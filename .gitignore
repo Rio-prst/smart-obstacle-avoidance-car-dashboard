@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Environment (keep .env.example tracked)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Prisma local database files
+backend/prisma/*.db
+backend/prisma/*.db-journal
+
+# Firmware secrets
+firmware/secrets.h
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

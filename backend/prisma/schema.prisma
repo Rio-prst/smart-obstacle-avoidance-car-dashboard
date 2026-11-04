@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  username       String   @unique
+  passwordHash   String   @map("password_hash")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  controlDevices Device[] @relation("DeviceControlUser")
+
+  @@map("users")
+}
+
+model Device {
+  id            String        @id
+  name          String
+  online        Boolean       @default(false)
+  mode          String        @default("AUTO")
+  state         String        @default("STOP")
+  lastSeen      DateTime?     @map("last_seen") @db.Timestamptz(6)
+  fw            String?
+  lastCmdSeq    Int           @default(0) @map("last_cmd_seq")
+  controlEpoch  Int           @default(0) @map("control_epoch")
+  controlUserId String?       @map("control_user_id") @db.Uuid
+  controlUntil  DateTime?     @map("control_until") @db.Timestamptz(6)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  controlUser   User?         @relation("DeviceControlUser", fields: [controlUserId], references: [id], onDelete: SetNull)
+  telemetry     Telemetry[]
+  events        Event[]
+  commands      Command[]
+  config        DeviceConfig?
+
+  @@map("devices")
+}
+
+model Telemetry {
+  id         BigInt   @id @default(autoincrement())
+  deviceId   String   @map("device_id")
+  ts         DateTime @db.Timestamptz(6)
+  mode       String
+  distCm     Float?   @map("dist_cm") @db.Real
+  valid      Boolean
+  state      String
+  pwm        Int      @db.SmallInt
+  avoidCount Int      @map("avoid_count")
+  rssi       Int?     @db.SmallInt
+  device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId, ts(sort: Desc)])
+  @@index([deviceId, mode, ts(sort: Desc)])
+  @@map("telemetry")
+}
+
+model Event {
+  id       BigInt   @id @default(autoincrement())
+  deviceId String   @map("device_id")
+  ts       DateTime @db.Timestamptz(6)
+  mode     String?
+  source   String   @default("DEVICE")
+  type     String
+  detail   Json     @default("{}") @db.JsonB
+  device   Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId, ts(sort: Desc)])
+  @@index([deviceId, type, ts(sort: Desc)])
+  @@map("events")
+}
+
+model Command {
+  id        BigInt    @id @default(autoincrement())
+  deviceId  String    @map("device_id")
+  seq       Int
+  cmd       String
+  payload   Json?     @db.JsonB
+  status    String    @default("pending")
+  reason    String?
+  exp       DateTime  @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  ackedAt   DateTime? @map("acked_at") @db.Timestamptz(6)
+  device    Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, seq])
+  @@index([deviceId, createdAt(sort: Desc)])
+  @@map("commands")
+}
+
+model DeviceConfig {
+  deviceId     String   @id @map("device_id")
+  ver          Int      @default(1)
+  stopCm       Int      @default(25) @map("stop_cm")
+  resumeCm     Int      @default(30) @map("resume_cm")
+  maxPwm       Int      @default(200) @map("max_pwm")
+  manualMaxPwm Int      @default(150) @map("manual_max_pwm")
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  device       Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("device_config")
+}
