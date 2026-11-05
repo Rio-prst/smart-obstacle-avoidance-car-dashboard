@@ -1,0 +1,152 @@
+@import 'tailwindcss';
+
+:root {
+  --background: #f3f6fb;
+  --surface: #ffffff;
+  --surface-muted: #f7f8fa;
+  --border: #e5e8ee;
+
+  --foreground: #0f172a;
+  --muted-foreground: #64748b;
+
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-strong: #1e40af;
+  --primary-soft: #7fa3f0;
+  --primary-subtle: #e3ebfb;
+  --primary-foreground: #ffffff;
+
+  --success: #16a34a;
+  --success-subtle: #e7f6ee;
+  --success-text: #15803d;
+  --warning: #d97706;
+  --warning-subtle: #fef3c7;
+  --warning-text: #92400e;
+  --danger: #dc2626;
+  --danger-subtle: #fdecec;
+  --danger-text: #b91c1c;
+  --danger-hover: #b91c1c;
+  --neutral-subtle: #f1f3f6;
+
+  --ring: #2563eb;
+
+  --card-radius: 12px;
+  --control-radius: 8px;
+  --chip-radius: 6px;
+  --popover-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --secondary: var(--neutral-subtle);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-muted);
+  --accent: var(--neutral-subtle);
+  --accent-foreground: var(--foreground);
+  --destructive: var(--danger);
+  --destructive-foreground: var(--primary-foreground);
+  --input: var(--border);
+  --radius: var(--control-radius);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-text: var(--warning-text);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-text: var(--danger-text);
+  --color-danger-hover: var(--danger-hover);
+  --color-neutral-subtle: var(--neutral-subtle);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --radius-card: var(--card-radius);
+  --radius-control: var(--control-radius);
+  --radius-chip: var(--chip-radius);
+  --shadow-popover: var(--popover-shadow);
+  --font-sans: 'Inter Variable', Inter, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    color: var(--foreground);
+    background: var(--background);
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@layer utilities {
+  .live-dot {
+    animation: live-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot {
+    animation: none;
+  }
+}
