@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { MqttService } from '../mqtt/mqtt.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface HealthResponse {
@@ -9,7 +10,10 @@ export interface HealthResponse {
 
 @Injectable()
 export class HealthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mqtt: MqttService,
+  ) {}
 
   async check(): Promise<HealthResponse> {
     let db: HealthResponse['db'] = 'disconnected';
@@ -21,9 +25,11 @@ export class HealthService {
       db = 'disconnected';
     }
 
+    const mqtt: HealthResponse['mqtt'] = this.mqtt.isConnected() ? 'connected' : 'disconnected';
+
     return {
       status: db === 'connected' ? 'ok' : 'degraded',
-      mqtt: 'disconnected',
+      mqtt,
       db,
     };
   }

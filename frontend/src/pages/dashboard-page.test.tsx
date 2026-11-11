@@ -106,7 +106,7 @@ vi.mock('@/hooks/use-dashboard-data', () => {
 describe('DashboardPage', () => {
   it('renders the live summary and command controls', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <DashboardPage />
       </MemoryRouter>,
     );
@@ -117,7 +117,7 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Penghindaran')).toBeInTheDocument();
     expect(screen.getByText('Event Terbaru')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'START' })).toBeDisabled();
-    expect(screen.getByRole('link', { name: /Buka kendali/i })).toHaveAttribute('href', '/control');
+    expect(screen.getAllByRole('link', { name: /Buka kendali/i })[0]).toHaveAttribute('href', '/control');
     expect(screen.queryByRole('button', { name: 'STOP' })).not.toBeInTheDocument();
   });
 });

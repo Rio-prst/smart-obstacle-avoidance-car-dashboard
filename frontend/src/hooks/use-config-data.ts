@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMockConfig, updateMockConfig } from '@/data/mock/mock-api';
+import { apiClient } from '@/lib/api-client';
 import type { DeviceConfig, UpdateConfigInput } from '@/types/api';
-import { requireMockData } from './use-dashboard-data';
+import { isMockDataEnabled } from './use-dashboard-data';
 
 export const configQueryKey = ['device-config'] as const;
 
@@ -9,8 +10,10 @@ export function useDeviceConfig() {
   return useQuery<DeviceConfig>({
     queryKey: configQueryKey,
     queryFn: () => {
-      requireMockData();
-      return Promise.resolve(getMockConfig());
+      if (isMockDataEnabled) {
+        return Promise.resolve(getMockConfig());
+      }
+      return apiClient.getConfig('car01');
     },
     staleTime: 5000,
   });
@@ -21,8 +24,10 @@ export function useUpdateConfig() {
 
   return useMutation<DeviceConfig, Error, UpdateConfigInput>({
     mutationFn: async (input) => {
-      requireMockData();
-      return updateMockConfig(input);
+      if (isMockDataEnabled) {
+        return updateMockConfig(input);
+      }
+      return apiClient.updateConfig(input, 'car01');
     },
     onSuccess: () => {
       void queryClient.invalidateQueries();

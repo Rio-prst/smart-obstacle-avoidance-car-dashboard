@@ -7,6 +7,7 @@ import {
   getMockSession,
   getMockSessions,
 } from '@/data/mock/mock-api';
+import { apiClient } from '@/lib/api-client';
 import type {
   CreateSessionInput,
   CreateTrialInput,
@@ -15,7 +16,7 @@ import type {
   TestSession,
   TestTrial,
 } from '@/types/api';
-import { requireMockData } from './use-dashboard-data';
+import { isMockDataEnabled } from './use-dashboard-data';
 
 export const sessionsQueryKey = ['sessions'] as const;
 export const sessionQueryKey = (sid: string) => ['session', sid] as const;
@@ -24,8 +25,10 @@ export function useSessions() {
   return useQuery<SessionListItem[]>({
     queryKey: sessionsQueryKey,
     queryFn: () => {
-      requireMockData();
-      return Promise.resolve(getMockSessions());
+      if (isMockDataEnabled) {
+        return Promise.resolve(getMockSessions());
+      }
+      return apiClient.getSessions('car01');
     },
     staleTime: 2000,
   });
@@ -35,11 +38,13 @@ export function useSession(sid: string | undefined) {
   return useQuery<SessionDetail>({
     queryKey: sessionQueryKey(sid ?? ''),
     queryFn: () => {
-      requireMockData();
       if (!sid) {
         throw new Error('Session ID is required.');
       }
-      return Promise.resolve(getMockSession(sid));
+      if (isMockDataEnabled) {
+        return Promise.resolve(getMockSession(sid));
+      }
+      return apiClient.getSessionDetail(sid);
     },
     enabled: Boolean(sid),
     staleTime: 2000,
@@ -51,8 +56,10 @@ export function useCreateSession() {
 
   return useMutation<TestSession, Error, CreateSessionInput>({
     mutationFn: async (input) => {
-      requireMockData();
-      return createMockSession(input);
+      if (isMockDataEnabled) {
+        return createMockSession(input);
+      }
+      return apiClient.createSession(input, 'car01');
     },
     onSuccess: () => {
       void queryClient.invalidateQueries();
@@ -63,10 +70,12 @@ export function useCreateSession() {
 export function useEndSession() {
   const queryClient = useQueryClient();
 
-  return useMutation<SessionDetail, Error, string>({
+  return useMutation<SessionDetail | TestSession, Error, string>({
     mutationFn: async (sid) => {
-      requireMockData();
-      return endMockSession(sid);
+      if (isMockDataEnabled) {
+        return endMockSession(sid);
+      }
+      return apiClient.endSession(sid);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries();
@@ -83,8 +92,10 @@ export function useAddTrial() {
     { sessionId: string; input: CreateTrialInput }
   >({
     mutationFn: async ({ sessionId, input }) => {
-      requireMockData();
-      return addMockTrial(sessionId, input);
+      if (isMockDataEnabled) {
+        return addMockTrial(sessionId, input);
+      }
+      return apiClient.addTrial(sessionId, input);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries();
@@ -97,8 +108,11 @@ export function useDeleteTrial() {
 
   return useMutation<void, Error, { sessionId: string; trialId: string }>({
     mutationFn: async ({ sessionId, trialId }) => {
-      requireMockData();
-      deleteMockTrial(sessionId, trialId);
+      if (isMockDataEnabled) {
+        deleteMockTrial(sessionId, trialId);
+        return;
+      }
+      return apiClient.deleteTrial(sessionId, trialId);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries();

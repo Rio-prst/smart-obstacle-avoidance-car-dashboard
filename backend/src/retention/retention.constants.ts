@@ -1,0 +1,4 @@
+export const RETENTION_DAYS_TELEMETRY = 14;
+export const RETENTION_DAYS_EVENTS = 90;
+export const RETENTION_DAYS_COMMANDS = 30;
+export const RETENTION_BATCH_SIZE = 10000;

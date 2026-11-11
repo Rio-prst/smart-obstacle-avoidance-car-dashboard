@@ -13,6 +13,7 @@ model User {
   passwordHash   String   @map("password_hash")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   controlDevices Device[] @relation("DeviceControlUser")
+  sessions       TestSession[]
 
   @@map("users")
 }
@@ -35,6 +36,7 @@ model Device {
   events        Event[]
   commands      Command[]
   config        DeviceConfig?
+  testSessions  TestSession[]
 
   @@map("devices")
 }
@@ -101,4 +103,50 @@ model DeviceConfig {
   device       Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
 
   @@map("device_config")
+}
+
+model TestSession {
+  id             BigInt      @id @default(autoincrement())
+  deviceId       String      @map("device_id")
+  createdBy      String      @map("created_by") @db.Uuid
+  type           String
+  name           String
+  mode           String
+  status         String      @default("running")
+  startedAt      DateTime    @default(now()) @map("started_at") @db.Timestamptz(6)
+  endedAt        DateTime?   @map("ended_at") @db.Timestamptz(6)
+  obstacleType   String?     @map("obstacle_type")
+  obstacleSize   String?     @map("obstacle_size")
+  floorSurface   String?     @map("floor_surface")
+  laneWidthCm    Int?        @map("lane_width_cm")
+  batteryLevel   String?     @map("battery_level")
+  pwmSetting     Int?        @map("pwm_setting")
+  configSnapshot Json        @default("{}") @map("config_snapshot") @db.JsonB
+  notes          String?
+  device         Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  user           User        @relation(fields: [createdBy], references: [id])
+  trials         TestTrial[]
+
+  @@index([deviceId, startedAt(sort: Desc)])
+  @@index([deviceId, status])
+  @@map("test_sessions")
+}
+
+model TestTrial {
+  id                 BigInt      @id @default(autoincrement())
+  sessionId          BigInt      @map("session_id")
+  trialNo            Int         @map("trial_no")
+  ts                 DateTime    @default(now()) @db.Timestamptz(6)
+  result             String?
+  refDistanceCm      Float?      @map("ref_distance_cm") @db.Real
+  measuredCm         Float?      @map("measured_cm") @db.Real
+  valid              Boolean?
+  pwm                Int?        @db.SmallInt
+  stoppingDistanceCm Float?      @map("stopping_distance_cm") @db.Real
+  stopLatencyMs      Int?        @map("stop_latency_ms")
+  note               String?
+  session            TestSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, trialNo])
+  @@map("test_trials")
 }
